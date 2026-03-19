@@ -47,5 +47,6 @@ public class Member {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.role = Role.USER;
     }
 }
