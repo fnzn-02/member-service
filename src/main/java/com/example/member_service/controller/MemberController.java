@@ -1,5 +1,6 @@
 package com.example.member_service.controller;
 
+import com.example.member_service.dto.LoginRequestDto;
 import com.example.member_service.dto.SignupRequestDto;
 import com.example.member_service.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,11 @@ public class MemberController {
         // 매니저에게 신청서에 적힌 내용(이메일, 비번, 닉네임)을 넘기면서 가입시켜 달라는 명령
         memberService.signup(requestDto);
         return "회원가입이 성공적으로 완료되었습니다.";
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequestDto requestDto){
+        // 손님한테 받은 Dto를 매니저(Service)한테 넘겨서 검사
+        return memberService.login(requestDto);
     }
 }

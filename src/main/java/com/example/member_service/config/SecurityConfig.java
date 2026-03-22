@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/members/signup").permitAll() // 회원가입 경로는 아무나 들어오게 프리패스
+                        .requestMatchers("/api/members/signup", "/api/members/login", "/error").permitAll() // 회원가입 경로는 아무나 들어오게 프리패스
                         .anyRequest().authenticated() // 그 외에 다른 곳은 전부 다 로그인 검사
                 );
         return http.build();

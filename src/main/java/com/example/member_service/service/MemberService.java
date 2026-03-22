@@ -1,5 +1,6 @@
 package com.example.member_service.service;
 
+import com.example.member_service.dto.LoginRequestDto;
 import com.example.member_service.dto.SignupRequestDto;
 import com.example.member_service.entity.Member;
 import com.example.member_service.repository.MemberRepository;
@@ -30,5 +31,18 @@ public class MemberService {
 
         // 창고에 저장
         memberRepository.save(newMember);
+    }
+
+    public String login(LoginRequestDto requestDto){
+        // 창고에서 이메일로 유저 찾기
+        Member member = memberRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+
+        // 비밀번호 일치하는지 검사
+        if(!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())){
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        // 검사 통과 메시지
+        return "로그인 성공!";
     }
 }
