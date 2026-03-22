@@ -16,7 +16,7 @@ public class MemberController {
     @PostMapping("/signup") // 데이터를 저장/생성 해달라는 요청이 오면 여기로 안내
     public String signup(@RequestBody SignupRequestDto requestDto){
         // 매니저에게 신청서에 적힌 내용(이메일, 비번, 닉네임)을 넘기면서 가입시켜 달라는 명령
-        memberService.signup(requestDto.getEmail(), requestDto.getPassword(), requestDto.getNickname());
+        memberService.signup(requestDto);
         return "회원가입이 성공적으로 완료되었습니다.";
     }
 }
