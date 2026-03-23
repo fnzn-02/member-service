@@ -1,9 +1,11 @@
 package com.example.member_service.controller;
 
 import com.example.member_service.dto.LoginRequestDto;
+import com.example.member_service.dto.LoginResponseDto;
 import com.example.member_service.dto.SignupRequestDto;
 import com.example.member_service.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,8 +24,8 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequestDto requestDto){
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto requestDto){
         // 손님한테 받은 Dto를 매니저(Service)한테 넘겨서 검사
-        return memberService.login(requestDto);
+        return ResponseEntity.ok(memberService.login(requestDto));
     }
 }

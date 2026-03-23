@@ -1,4 +1,4 @@
-### 1. 회원가입 테스트
+### 회원가입 테스트
 POST http://localhost:8080/api/members/signup
 Content-Type: application/json
 
@@ -14,5 +14,5 @@ Content-Type: application/json
 
 {
   "email": "test2@gmail.com",
-  "password": "12345"
+  "password": "1234"
 }
