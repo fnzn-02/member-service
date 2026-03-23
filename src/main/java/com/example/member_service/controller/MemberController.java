@@ -28,4 +28,9 @@ public class MemberController {
         // 손님한테 받은 Dto를 매니저(Service)한테 넘겨서 검사
         return ResponseEntity.ok(memberService.login(requestDto));
     }
+
+    @GetMapping("/test")
+    public String test(){
+        return "보안 문지기를 뚫고 들어오셨군요! 환영합니다!";
+    }
 }

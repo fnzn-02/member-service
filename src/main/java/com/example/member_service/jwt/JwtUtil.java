@@ -29,4 +29,26 @@ public class JwtUtil {
                 .signWith(key, SignatureAlgorithm.HS256) // 서버만의 비밀 열쇠로 위조 방지 도장
                 . compact(); // 이 모든 정보를 압축해서 하나의 긴 문자열(토큰)로 변환
     }
+
+    // 토큰 해독기: 토큰을 까서 안에 적힌 이메일을 꺼내오는 기능
+    public String getEmailFromToken(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(key) // 환경변수에 숨겨둔 코드로 자물쇠를 품
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject(); // 아까 넣었던 email을 뽑아옴
+    }
+
+    // 토큰 위조 감별기: 해커가 조작하지 않았는지, 유효기간이 안 지났는지 검사
+    public boolean validateToken(String token){
+        try{
+            // 이 코드가 에러 없이 정상적으로 딱 실행되면 멀쩡한 토큰이라는 뜻
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e){
+            // 만약 유효기간이 지나서 만료되었거나 해커가 하나라도 바꿧다면 이쪽으로 실행
+            return false;
+        }
+    }
 }
