@@ -49,4 +49,14 @@ public class Member {
         this.nickname = nickname;
         this.role = Role.USER;
     }
+
+    // 닉네임 변경을 위한 전용 스위치
+    public void updateNickname(String newNickname){
+        this.nickname = newNickname;
+    }
+
+    // 비밀번호 변경을 위한 전용 스위치
+    public void updatePassword(String newPassword){
+        this.password = newPassword;
+    }
 }

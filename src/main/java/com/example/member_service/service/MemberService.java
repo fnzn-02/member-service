@@ -1,8 +1,6 @@
 package com.example.member_service.service;
 
-import com.example.member_service.dto.LoginRequestDto;
-import com.example.member_service.dto.LoginResponseDto;
-import com.example.member_service.dto.SignupRequestDto;
+import com.example.member_service.dto.*;
 import com.example.member_service.entity.Member;
 import com.example.member_service.jwt.JwtUtil;
 import com.example.member_service.repository.MemberRepository;
@@ -51,5 +49,57 @@ public class MemberService {
 
         // 뽑아낸 토큰을 손님에게 전달
         return new LoginResponseDto(token);
+    }
+
+    // 내 정보 조회 (마이페이지)
+    @Transactional(readOnly = true) // 데이터 변경 없이 '읽기'만 할 때 붙여주면 성능이 좋아짐
+    public MemberResponseDto getMyInfo(String email){
+        // DB에서 이메일로 유저 찾기
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 찾은 유저 정보를 상자에 담아서 반환
+        return new MemberResponseDto(member);
+    }
+
+    // 닉네임 수정 로직
+    @Transactional
+    public void updateNickname(String email, NicknameUpdateRequestDto requestDto){
+        // DB에서 이메일로 유저 찾기
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 엔터티에 만들어둔 스위치를 눌러서 닉네임 변경
+        member.updateNickname(requestDto.getNewNickname());
+    }
+
+    // 회원 탈퇴 로직
+    @Transactional
+    public void deleteMember(String email){
+        // DB에서 이메일로 유저 찾기
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다,"));
+
+        // DB에서 해당 유저 완전히 삭제
+        memberRepository.delete(member);
+    }
+
+    // 비밀번호 변경 로직
+    @Transactional
+    public void updatePassword(String email, PasswordUpdateRequestDto requestDto){
+        // DB에서 이메일로 유저 찾기
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 본인 확인: 지금 입력한 현재 비밀번호가 DB에 있는 암호화된 비밀번호랑 맞는지 비교
+        if (!passwordEncoder.matches(requestDto.getCurrentPassword(), member.getPassword())){
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 검문 통과. 새 비밀번호를 암호화 기계에 넣고 돌리기
+        String encodedNewPassword = passwordEncoder.encode(requestDto.getNewPassword());
+
+        // 암호화된 새 비밀번호로 스위치 눌러서 DB 업데이트
+        member.updatePassword(encodedNewPassword);
     }
 }

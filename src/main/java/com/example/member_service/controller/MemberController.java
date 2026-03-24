@@ -1,12 +1,11 @@
 package com.example.member_service.controller;
 
-import com.example.member_service.dto.LoginRequestDto;
-import com.example.member_service.dto.LoginResponseDto;
-import com.example.member_service.dto.SignupRequestDto;
+import com.example.member_service.dto.*;
 import com.example.member_service.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/members")
@@ -32,5 +31,51 @@ public class MemberController {
     @GetMapping("/test")
     public String test(){
         return "보안 문지기를 뚫고 들어오셨군요! 환영합니다!";
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<MemberResponseDto> getMyInfo(Principal principal){
+        // 문지기가 검문을 통과시키면서 이 사람 이메일 00입니다 라고 적어둔 신원 보증서
+        // principal.getName()만 호출하면, 토큰 검사 없이 바로 본인 이메일 꺼내 쑬 수 있음
+        String email = principal.getName();
+
+        // 매니저한테 이메일 넘겨서 정보 찾아오라고 시키기
+        return ResponseEntity.ok(memberService.getMyInfo(email));
+    }
+
+    // 닉네임 수정 API
+    @PutMapping("/me/nickname")
+    public ResponseEntity<String> updateNickname(Principal principal, @RequestBody NicknameUpdateRequestDto requestDto){
+        // 문지기가 학인해준 이메일 꺼내기
+        String email = principal.getName();
+
+        // 매니저한테 이메일이랑 새 닉네임 상자 넘겨주면서 바꿔오라는 명령
+        memberService.updateNickname(email, requestDto);
+
+        return ResponseEntity.ok("닉네임이 성공적으로 변경되었습니다.");
+    }
+
+    // 회원 탈퇴 API
+    @DeleteMapping("/me")
+    public ResponseEntity<String> deleteMember(Principal principal){
+        // 문지기가 확인해준 이메일 꺼내기
+        String email = principal.getName();
+
+        // 매니저한테 이메일 넘겨주면서 db에서 삭제 명령
+        memberService.deleteMember(email);
+
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+    }
+
+    // 비밀번호 변경 API
+    @PutMapping("/me/password")
+    public ResponseEntity<String> updatePassword(Principal principal, @RequestBody PasswordUpdateRequestDto requestDto){
+        // 문지기가 확인해준 이메일 꺼내기
+        String email = principal.getName();
+
+        // 매니저한테 이메일이랑 비밀번호 상자 넘겨주면서 검사 명령
+        memberService.updatePassword(email, requestDto);
+
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 }
