@@ -3,8 +3,8 @@ POST http://localhost:8080/api/members/signup
 Content-Type: application/json
 
 {
-  "email": "test2@gmail.com",
-  "password": "1234",
+  "email": "test3@gmail.com",
+  "password": "test1234!",
   "nickname": "test"
 }
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
   "email": "test2@gmail.com",
-  "password": "12345"
+  "password": "1234"
 }
 
 ### 토큰 없이 그냥 들어가보기
@@ -50,4 +50,4 @@ Content-Type: application/json
 
 ### 회원 탈퇴 테스트
 DELETE http://localhost:8080/api/members/me
-Authorization: Bearer 여기에_발급받은_토큰을_넣어주세요
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MkBnbWFpbC5jb20iLCJpYXQiOjE3NzQzNjg1MzQsImV4cCI6MTc3NDM3MDMzNH0.9hHyq-WoElYdNJnLdkVuhcj_7zYOUW1j7_pPrTyD6uc
