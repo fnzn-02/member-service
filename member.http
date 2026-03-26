@@ -35,7 +35,7 @@ Authorization: Bearer 여기에_발급받은_토큰을_넣어주세요
 Content-Type: application/json
 
 {
-  "newNickname": "루쿠"
+  "newNickname": "닉네임"
 }
 
 ### 비밀번호 변경 테스트
@@ -50,4 +50,17 @@ Content-Type: application/json
 
 ### 회원 탈퇴 테스트
 DELETE http://localhost:8080/api/members/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MkBnbWFpbC5jb20iLCJpYXQiOjE3NzQzNjg1MzQsImV4cCI6MTc3NDM3MDMzNH0.9hHyq-WoElYdNJnLdkVuhcj_7zYOUW1j7_pPrTyD6uc
+Authorization: 여기에_발급받은_토큰을_넣어주세요
+
+### 인증번호 요청
+POST http://localhost:8080/api/members/password/code?email = 본인이메일
+
+### 인증번호 확인 및 비밀번호 변경
+POST http://localhost:8080/api/members/password/reset
+Content-Type: application/json
+
+{
+  "email": "이메일",
+  "code": "메일로 보낸 인증번호",
+  "newPassword": "새로운 비밀번호"
+}

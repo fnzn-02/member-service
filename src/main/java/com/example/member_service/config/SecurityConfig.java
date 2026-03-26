@@ -26,7 +26,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/members/signup", "/api/members/login", "/error").permitAll() // 회원가입 경로는 아무나 들어오게 프리패스
+                        .requestMatchers(
+                                "/api/members/signup",
+                                "/api/members/login",
+                                "/api/members/password/code",
+                                "/api/members/password/reset",
+                                "/error").permitAll() // 회원가입 경로는 아무나 들어오게 프리패스
                         .anyRequest().authenticated() // 그 외에 다른 곳은 전부 다 로그인 검사
                 )
                 // 우리가 만든 문지기(JwtFilter)를 스프링의 기본 문지기보다 맨 앞에 떡하니 세우기

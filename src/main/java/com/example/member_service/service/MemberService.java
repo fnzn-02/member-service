@@ -15,6 +15,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     @Transactional
     public void signup(SignupRequestDto requestDto){
@@ -101,5 +102,23 @@ public class MemberService {
 
         // 암호화된 새 비밀번호로 스위치 눌러서 DB 업데이트
         member.updatePassword(encodedNewPassword);
+    }
+
+    // 인증번호 확인 후 비밀번호 변경
+    @Transactional
+    public void resetPassword(String email, String code, String newPassword){
+
+        // 유저가 보낸 인증번호가 맞는지 우체부한테 물어보기
+        if(!emailService.verifyCode(email, code)){
+            throw new IllegalArgumentException("인증번호가 틀렸거나 만료되었습니다.");
+        }
+
+        // 이메일로 유저 찾기
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+
+        // 새 비밀번호 암호화해서 DB에 저장
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        member.updatePassword(encodedPassword);
     }
 }

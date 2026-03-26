@@ -1,12 +1,14 @@
 package com.example.member_service.controller;
 
 import com.example.member_service.dto.*;
+import com.example.member_service.service.EmailService;
 import com.example.member_service.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.Map;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -15,6 +17,7 @@ import jakarta.validation.Valid;
 public class MemberController {
     // 안내데스크 뒤에서 대기하고 있는 실무 매니저 클래스 이름 선언
     private final MemberService memberService;
+    private final EmailService emailService;
 
     // 회원가입 API
     // 손님이 가입 신청서(DTO)를 들고 찾아왔을 때 실행되는 곳
@@ -80,5 +83,23 @@ public class MemberController {
         memberService.updatePassword(email, requestDto);
 
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
+
+    // 인증번호 이메일로 쏘기 API
+    @PostMapping("/password/code")
+    public ResponseEntity<String> sendVerificationCode(@RequestParam String email){
+        emailService.sendVerificationCode(email);
+        return ResponseEntity.ok("인증번호가 메일로 발송되었습니다.");
+    }
+
+    // 인증번호 확인 & 비밀번호 변경 API
+    @PostMapping("/password/reset")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request){
+        String email = request.get("email");
+        String code = request.get("code");
+        String newPassword = request.get("newPassword");
+
+        memberService.resetPassword(email, code, newPassword);
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.");
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+
 @Component // 이 객체 너가 창고에 올려두고 관리하라는 뜻
 public class JwtUtil {
     private final Key key;
