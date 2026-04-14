@@ -28,15 +28,27 @@ public class MemberController {
         return ResponseEntity.ok("회원가입이 성공적으로 완료되었습니다.");
     }
 
+    // 회원가입 전용 인증번호 발송
+    @PostMapping("/signup/code")
+    public ResponseEntity<String> sendSignupCode(@RequestParam("email") String email){
+        memberService.sendSignupCode(email);
+        return ResponseEntity.ok("인증번호가 발송되었습니다.");
+    }
+
+    // 인증번호가 맞는지 화면에서 바로 확인하기 위한 API
+    @PostMapping("/signup/verify")
+    public ResponseEntity<String> verifyCode(@RequestParam("email") String email, @RequestParam("code") String code){
+        if(emailService.verifyCode(email, code)){
+            return ResponseEntity.ok("인증에 성공했습니다.");
+        } else{
+            return ResponseEntity.badRequest().body("인증번호가 틀렸거나 만료되었습니다.");
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto requestDto){
         // 손님한테 받은 Dto를 매니저(Service)한테 넘겨서 검사
         return ResponseEntity.ok(memberService.login(requestDto));
-    }
-
-    @GetMapping("/test")
-    public String test(){
-        return "보안 문지기를 뚫고 들어오셨군요! 환영합니다!";
     }
 
     @GetMapping("/me")
@@ -87,7 +99,7 @@ public class MemberController {
 
     // 인증번호 이메일로 쏘기 API
     @PostMapping("/password/code")
-    public ResponseEntity<String> sendVerificationCode(@RequestParam String email){
+    public ResponseEntity<String> sendVerificationCode(@RequestParam("email") String email){
         emailService.sendVerificationCode(email);
         return ResponseEntity.ok("인증번호가 메일로 발송되었습니다.");
     }

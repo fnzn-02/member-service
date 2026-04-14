@@ -19,9 +19,20 @@ public class MemberService {
 
     @Transactional
     public void signup(SignupRequestDto requestDto){
+
         // 이메일 중복 검사
         if(memberRepository.findByEmail(requestDto.getEmail()).isPresent()){
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        // 10분 이내에 인증을 마친 상태인지 확인
+        if(!emailService.isVerified(requestDto.getEmail())){
+            throw new IllegalArgumentException("이메일 인증이 완료되지 않았거나 10분 유효시간이 만료되었습니다.");
+        }
+
+        // 닉네임 중복 검사
+        if(memberRepository.findByNickname(requestDto.getNickname()).isPresent()){
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
         // 포장 (빌더 패턴 적용)
@@ -33,6 +44,9 @@ public class MemberService {
 
         // 창고에 저장
         memberRepository.save(newMember);
+
+        // 회원가입이 끝나면 인증 상태를 완전히 파기
+        emailService.clearVerification(requestDto.getEmail());
     }
 
     public LoginResponseDto login(LoginRequestDto requestDto){
@@ -52,6 +66,13 @@ public class MemberService {
         return new LoginResponseDto(token);
     }
 
+    public void sendSignupCode(String email) {
+        if (memberRepository.findByEmail(email).isPresent()) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+        emailService.sendVerificationCode(email);
+    }
+
     // 내 정보 조회 (마이페이지)
     @Transactional(readOnly = true) // 데이터 변경 없이 '읽기'만 할 때 붙여주면 성능이 좋아짐
     public MemberResponseDto getMyInfo(String email){
@@ -69,6 +90,11 @@ public class MemberService {
         // DB에서 이메일로 유저 찾기
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 새 닉네임이 이미 존재하는지 검사
+        if(memberRepository.findByNickname(requestDto.getNewNickname()).isPresent()){
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
 
         // 엔터티에 만들어둔 스위치를 눌러서 닉네임 변경
         member.updateNickname(requestDto.getNewNickname());

@@ -37,8 +37,6 @@ public class Member {
     @CreatedDate // 데이터가 처음 Insert 될 때 현재 시간 자동 기록
     private LocalDateTime createdAt;
 
-    private LocalDateTime deletedAt;
-
     @LastModifiedDate // 데이터가 Update 될 때마다 현재 시간 자동으로 갱신
     private LocalDateTime updatedAt;
 

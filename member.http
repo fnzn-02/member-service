@@ -53,7 +53,7 @@ DELETE http://localhost:8080/api/members/me
 Authorization: 여기에_발급받은_토큰을_넣어주세요
 
 ### 인증번호 요청
-POST http://localhost:8080/api/members/password/code?email = 본인이메일
+POST http://localhost:8080/api/members/password/code?email = jdw2318@gmail.com
 
 ### 인증번호 확인 및 비밀번호 변경
 POST http://localhost:8080/api/members/password/reset

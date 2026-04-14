@@ -1,50 +1,67 @@
 package com.example.member_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.security.SecureRandom;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    // 설정 파일에 적어둔 구글 서버 열쇠를 들고 있는 우체부 객체
+
     private final JavaMailSender mailSender;
 
-    // 이메일(Key)과 6자리 인증번호를 임시로 적어둘 메모장 (실무의 Redis 역할)
-    private final Map<String, String> verificationCodes = new ConcurrentHashMap<>();
+    // Redis와 통신하기 위해 새로 고용한 관리자
+    private final StringRedisTemplate redisTemplate;
 
     // 6자리 인증번호 생성 및 메일 발송
     public void sendVerificationCode(String email){
+        String code = String.format("%06d", new SecureRandom().nextInt(1000000));
 
-        // 6자리 랜덤 숫자 생성
-        String code = String.format("%06d", new Random().nextInt(1000000));
+        // 1. Redis에 저장 (키: "EMAIL_CODE:이메일", 값: 인증번호, 수명: 10분)
+        // 10분이 지나면 알아서 증발(삭제)됩니다.
+        redisTemplate.opsForValue().set("EMAIL_CODE:" + email, code, 10, TimeUnit.MINUTES);
 
-        // 메모장에 저장
-        verificationCodes.put(email, code);
+        // 기존의 인증 완료 상태가 남아있을 수 있으니 초기화
+        redisTemplate.delete("VERIFIED:" + email);
 
-        // 메일 쏘기
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("[Member Service] 비밀번호 재설정 인증번호");
-        message.setText("요청하신 인증번호는 [" + code + "] 입니다. 정확히 입력해 주세요.");
+        message.setFrom("OnAir <luyanfndis@gmail.com>");
+        message.setSubject("[OnAir] 인증번호 발송");
+        message.setText("요청하신 인증번호는 [" + code + "] 입니다. 10분 내에 정확히 입력해 주세요.");
 
         mailSender.send(message);
     }
 
     // 유저가 입력한 인증번호가 맞는지 검증
     public boolean verifyCode(String email, String inputCode){
-        String savedCode = verificationCodes.get(email);
+        // Redis에서 저장된 코드 꺼내오기
+        String savedCode = redisTemplate.opsForValue().get("EMAIL_CODE:" + email);
 
-        // 메모장에 적힌 번호랑 유저가 보낸 번호가 일치한다면
         if(savedCode != null && savedCode.equals(inputCode)){
-            verificationCodes.remove(email); // 인증 성공했으니 메모장에서 삭제
+            // 1. 인증에 성공했으니 기존 인증번호는 Redis에서 바로 파기
+            redisTemplate.delete("EMAIL_CODE:" + email);
+
+            // 2. "이 이메일은 인증을 통과했다"는 증명서를 새로 발급해서 10분간 저장
+            redisTemplate.opsForValue().set("VERIFIED:" + email, "TRUE", 10, TimeUnit.MINUTES);
             return true;
         }
         return false;
+    }
+
+    // 인증완료 시점부터 10분 이내에 가입을 완료했는지 검사
+    public boolean isVerified(String email){
+        // Redis에 "VERIFIED:이메일" 이라는 증명서가 남아있는지만 확인하면 끝!
+        return Boolean.TRUE.equals(redisTemplate.hasKey("VERIFIED:" + email));
+    }
+
+    // 가입 완료 후 보안을 위해 인증 상태 완전 삭제
+    public void clearVerification(String email){
+        redisTemplate.delete("VERIFIED:" + email);
     }
 }

@@ -19,4 +19,8 @@ public class SignupRequestDto {
 
     @NotBlank(message = "닉네임은 필수 입력 값입니다.")
     private String nickname;
+
+    // 프론트엔드에서 보낼 6자리 인증번호 받을 필드
+    @NotBlank(message = "인증번호는 필수 입력 값입니다.")
+    private String code;
 }
